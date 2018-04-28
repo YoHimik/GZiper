@@ -1,0 +1,11 @@
+E:\Projects\GZiper\bin\Debug\netcoreapp2.0\GZiper.deps.json
+E:\Projects\GZiper\bin\Debug\netcoreapp2.0\GZiper.runtimeconfig.json
+E:\Projects\GZiper\bin\Debug\netcoreapp2.0\GZiper.runtimeconfig.dev.json
+E:\Projects\GZiper\bin\Debug\netcoreapp2.0\GZiper.dll
+E:\Projects\GZiper\bin\Debug\netcoreapp2.0\GZiper.pdb
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.csproj.CoreCompileInputs.cache
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.AssemblyInfoInputs.cache
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.AssemblyInfo.cs
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.dll
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.pdb
+E:\Projects\GZiper\obj\Debug\netcoreapp2.0\GZiper.csprojResolveAssemblyReference.cache
