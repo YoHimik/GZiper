@@ -2,38 +2,52 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace GZiper.Core
-{
-    public static class Writer
-    {
+namespace GZiper.Core {
+    public static class Writer {
         private static bool _started;
         public static bool Done;
 
-        private static Queue<byte[]> _blocks;
+        private static List<Block> _blocks;
 
-        public static void StartWrite(string pathToFile, bool compress)
-        {
+        public static void addBlock() {
+            _blocks = new List<Block>();
+        }
+
+        public static void StartWrite(string pathToFile, bool compress) {
             if (IsStarted())
                 return;
-            _blocks = new Queue<byte[]>();
-            using (FileStream stream = new FileStream( pathToFile, FileMode.Append))
-            {
-                while (!Collector.Done || GetCount() > 0)
-                {
+            int number = 1;
+            using (FileStream writeStream = new FileStream(pathToFile, FileMode.Append)) {
+                while (!IsCollectorsDone() || GetCount() > 0) {
                     if (GetCount() == 0)
                         continue;
-                    byte[] block = GetBlock();
-                    if ( compress)
-                        stream.Write(BitConverter.GetBytes(block.Length), 0, 3);
-                    stream.Write(block, 0, block.Length);
+                    Block block = GetBlock(number);
+                    if (block.Number != number)
+                        continue;
+                    number++;
+                    if (compress)
+                        WriteBlockSize(writeStream, block.Bytes.Length);
+                    writeStream.Write(block.Bytes, 0, block.Bytes.Length);
+                    Console.WriteLine(block.Bytes.Length + " o");
+
                 }
             }
 
             Break();
         }
 
-        private static bool IsStarted()
-        {
+        private static bool IsCollectorsDone() {
+            bool done = true;
+            foreach (Collector collector in Ziper.Collectors)
+                done &= collector.Done;
+            return done;
+        }
+
+        private static void WriteBlockSize(FileStream writeStream, int size) {
+            writeStream.Write(BitConverter.GetBytes(size), 0, 3);
+        }
+
+        private static bool IsStarted() {
             if (_started)
                 return true;
             _started = true;
@@ -41,32 +55,32 @@ namespace GZiper.Core
             return false;
         }
 
-        private static void Break()
-        {
+        private static void Break() {
             Done = true;
             _started = false;
         }
 
-        public static void AddBlock(byte[] block)
-        {
-            lock (_blocks)
-            {
-                _blocks.Enqueue(block);
+        public static void AddBlock(Block block) {
+            lock (_blocks) {
+                _blocks.Add(block);
             }
         }
 
-        public static byte[] GetBlock()
-        {
-            lock (_blocks)
-            {
-                return _blocks.Dequeue();
+        public static Block GetBlock(int number) {
+            lock (_blocks) {
+                Block b = new Block();
+                for (int i = 0; i < _blocks.Count; i++)
+                    if (_blocks[i].Number == number) {
+                        b = _blocks[i];
+                        _blocks.RemoveAt(i);
+                    }
+
+                return b;
             }
         }
 
-        public static int GetCount()
-        {
-            lock (_blocks)
-            {
+        public static int GetCount() {
+            lock (_blocks) {
                 return _blocks.Count;
             }
         }

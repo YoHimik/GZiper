@@ -1,30 +1,31 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace GZiper.Core
-{
-    public static class Collector
-    {
-        public static bool Done;
+namespace GZiper.Core {
+    public class Collector {
+        public bool Done;
 
-        public static void Compress()
-        {
+        public Collector() {
             Done = false;
+        }
 
-            while (!Reader.Done || Reader.GetCount() > 0)
-            {
-                if (Reader.GetCount() == 0)
+        public void Compress() {
+            while (!Reader.Done || Reader.GetCount() > 0) {
+                Block b = Reader.TryGetBlock();
+                if (b.Number <= 0)
                     continue;
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Compress))
-                    {
-                        byte[] b = Reader.GetBlock();
 
-                        zipStream.Write(b, 0, b.Length);
-                        byte[] r = memoryStream.ToArray();
-                        Writer.AddBlock(r);
+                using (MemoryStream memoryStream = new MemoryStream()) {
+                    using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Compress)) {
+                        /*using (MemoryStream m = new MemoryStream(b.Bytes)) {
+                            m.CopyTo(zipStream);
+                            r = memoryStream.ToArray();
+                       }*/
+                        zipStream.Write(b.Bytes, 0, b.Bytes.Length);
                     }
+
+                    byte[] r = memoryStream.ToArray();
+                    Writer.AddBlock(new Block(b.Number, r));
                 }
             }
 
@@ -32,22 +33,22 @@ namespace GZiper.Core
         }
 
 
-        public static void Decompress()
-        {
-            Done = false;
-            while (!Reader.Done || Reader.GetCount() > 0)
-            {
-                if (Reader.GetCount() == 0)
+        public void Decompress() {
+            while (!Reader.Done || Reader.GetCount() > 0) {
+                Block b = Reader.TryGetBlock();
+                if (b.Number <= 0)
                     continue;
-                byte[] b = Reader.GetBlock();
-                using (MemoryStream memoryStream = new MemoryStream(b))
-                {
-                    using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-                    {
+                using (MemoryStream memoryStream = new MemoryStream(b.Bytes)) {
+                    using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
+                        /*  using (MemoryStream m = new MemoryStream()) {
+                              zipStream.CopyTo(m);
+                              r = m.ToArray();
+                          }
+                          Writer.AddBlock(new Block(b.Number, r));*/
                         byte[] r = new byte[1024 * 1024];
                         zipStream.Read(r, 0, r.Length);
 
-                        Writer.AddBlock(r);
+                        Writer.AddBlock(new Block(b.Number, r));
                     }
                 }
             }
