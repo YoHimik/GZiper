@@ -5,7 +5,7 @@ using System.IO;
 namespace GZiper.Core {
     public static class Reader {
         private const int Mega = 1024 * 1024;
-        private const int MaxBlockCount = 2;
+        private const int MaxBlockCount = 5;
         private const int BlockSizeLength = 3;
 
         private static int _blockSize;
@@ -15,10 +15,6 @@ namespace GZiper.Core {
 
         public static bool Done;
 
-        public static void addBlock()
-        {
-            _blocks = new Queue<Block>();
-        }
 
         public static void StartRead(string pathToFile, bool compress) {
             if (IsStarted())
@@ -71,6 +67,8 @@ namespace GZiper.Core {
         }
 
         public static Block TryGetBlock() {
+            if (_blocks == null)
+                _blocks = new Queue<Block>();
             lock (_blocks) {
                 if (_blocks.Count > 0)
                     return _blocks.Dequeue();
@@ -79,6 +77,8 @@ namespace GZiper.Core {
         }
 
         public static int GetCount() {
+            if (_blocks == null)
+                _blocks = new Queue<Block>();
             lock (_blocks) {
                 return _blocks.Count;
             }

@@ -9,8 +9,6 @@ namespace GZiper.Core {
         public static void Compress(string inFile, string outFile) {
             Thread reader = new Thread(delegate() { Reader.StartRead(inFile, true); });
             Thread writer = new Thread(delegate() { Writer.StartWrite(outFile, true); });
-            Writer.addBlock();
-            Reader.addBlock();
             Collectors = new Collector[ThreadCount];
             CollectorsThreads = new Thread[ThreadCount];
             reader.Start();
@@ -27,8 +25,6 @@ namespace GZiper.Core {
         public static void Decompress(string inFile, string outFile) {
             Thread reader = new Thread(delegate() { Reader.StartRead(inFile, false); });
             Thread writer = new Thread(delegate() { Writer.StartWrite(outFile, false); });
-            Writer.addBlock();
-            Reader.addBlock();
             Collectors = new Collector[ThreadCount];
             CollectorsThreads = new Thread[ThreadCount];
             reader.Start();

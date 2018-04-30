@@ -17,15 +17,12 @@ namespace GZiper.Core {
 
                 using (MemoryStream memoryStream = new MemoryStream()) {
                     using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Compress)) {
-                        /*using (MemoryStream m = new MemoryStream(b.Bytes)) {
-                            m.CopyTo(zipStream);
-                            r = memoryStream.ToArray();
-                       }*/
                         zipStream.Write(b.Bytes, 0, b.Bytes.Length);
                     }
 
-                    byte[] r = memoryStream.ToArray();
-                    Writer.AddBlock(new Block(b.Number, r));
+                    b.Bytes = memoryStream.ToArray();
+                    
+                    Writer.AddBlock(b);
                 }
             }
 
@@ -38,15 +35,15 @@ namespace GZiper.Core {
                 Block b = Reader.TryGetBlock();
                 if (b.Number <= 0)
                     continue;
-                byte[] r;
                 using (MemoryStream memoryStream = new MemoryStream(b.Bytes)) {
                     using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
                         using (MemoryStream m = new MemoryStream()) {
                             zipStream.CopyTo(m);
-                            r = m.ToArray();
+                            b.Bytes = m.ToArray();
                         }
 
-                        Writer.AddBlock(new Block(b.Number, r));
+                      
+                        Writer.AddBlock(b);
                     }
                 }
             }

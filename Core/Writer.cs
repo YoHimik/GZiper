@@ -9,10 +9,6 @@ namespace GZiper.Core {
 
         private static List<Block> _blocks;
 
-        public static void addBlock() {
-            _blocks = new List<Block>();
-        }
-
         public static void StartWrite(string pathToFile, bool compress) {
             if (IsStarted())
                 return;
@@ -61,12 +57,16 @@ namespace GZiper.Core {
         }
 
         public static void AddBlock(Block block) {
+            if (_blocks == null)
+                _blocks = new List<Block>();
             lock (_blocks) {
                 _blocks.Add(block);
             }
         }
 
         public static Block GetBlock(int number) {
+            if (_blocks == null)
+                _blocks = new List<Block>();
             lock (_blocks) {
                 Block b = new Block();
                 for (int i = 0; i < _blocks.Count; i++)
@@ -80,6 +80,8 @@ namespace GZiper.Core {
         }
 
         public static int GetCount() {
+            if (_blocks == null)
+                _blocks = new List<Block>();
             lock (_blocks) {
                 return _blocks.Count;
             }
