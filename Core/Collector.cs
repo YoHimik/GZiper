@@ -38,21 +38,18 @@ namespace GZiper.Core {
                 Block b = Reader.TryGetBlock();
                 if (b.Number <= 0)
                     continue;
+                byte[] r;
                 using (MemoryStream memoryStream = new MemoryStream(b.Bytes)) {
                     using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
-                        /*  using (MemoryStream m = new MemoryStream()) {
-                              zipStream.CopyTo(m);
-                              r = m.ToArray();
-                          }
-                          Writer.AddBlock(new Block(b.Number, r));*/
-                        byte[] r = new byte[1024 * 1024];
-                        zipStream.Read(r, 0, r.Length);
+                        using (MemoryStream m = new MemoryStream()) {
+                            zipStream.CopyTo(m);
+                            r = m.ToArray();
+                        }
 
                         Writer.AddBlock(new Block(b.Number, r));
                     }
                 }
             }
-
             Done = true;
         }
     }

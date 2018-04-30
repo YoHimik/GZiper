@@ -4,7 +4,7 @@ namespace GZiper.Core {
     public static class Ziper {
         public static Collector[] Collectors;
         public static Thread[] CollectorsThreads;
-        private const int ThreadCount = 5;
+        private const int ThreadCount = 1;
 
         public static void Compress(string inFile, string outFile) {
             Thread reader = new Thread(delegate() { Reader.StartRead(inFile, true); });
