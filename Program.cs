@@ -2,14 +2,28 @@
 using GZiper.Core;
 
 namespace GZiper {
-    class Program {
-        static void Main(string[] args) {
-            string sourceFile = "test-img.jpg"; // исходный файл
-            string compressedFile = "test-arch.gz"; // сжатый файл
-            string newFile = "test-img-out.jpg";
-
-            Ziper.Compress(sourceFile, compressedFile);
-            Ziper.Decompress(compressedFile, newFile);
+    internal static class Program {
+        private static void Main(string[] args) {
+            try {
+                if (args.Length == 0 || args.Length > 3)
+                    throw new ArgumentException("Not enough or too many arguments!");
+                switch (args[0].ToLower()) {
+                    case "compress":
+                        Ziper.Compress(args[1], args[2]);
+                        break;
+                    case "decompress":
+                        Ziper.Decompress(args[1], args[2]);
+                        break;
+                    default:
+                        throw new ArgumentException("Unsupported method! use \"compress\" or \"decompress\".");
+                }
+            }
+            catch (Exception e) {
+                Console.WriteLine("Something went wrong in: ");
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("With message: {0}", e.Message);
+            }
+            Console.WriteLine("Press any key to exit...");
         }
     }
 }

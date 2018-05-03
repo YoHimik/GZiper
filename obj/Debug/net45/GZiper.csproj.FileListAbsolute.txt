@@ -1,0 +1,8 @@
+E:\Projects\GZiper\bin\Debug\net45\GZiper.exe
+E:\Projects\GZiper\bin\Debug\net45\GZiper.pdb
+E:\Projects\GZiper\obj\Debug\net45\GZiper.csprojResolveAssemblyReference.cache
+E:\Projects\GZiper\obj\Debug\net45\GZiper.csproj.CoreCompileInputs.cache
+E:\Projects\GZiper\obj\Debug\net45\GZiper.AssemblyInfoInputs.cache
+E:\Projects\GZiper\obj\Debug\net45\GZiper.AssemblyInfo.cs
+E:\Projects\GZiper\obj\Debug\net45\GZiper.exe
+E:\Projects\GZiper\obj\Debug\net45\GZiper.pdb

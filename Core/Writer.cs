@@ -2,88 +2,73 @@
 using System.Collections.Generic;
 using System.IO;
 
+
 namespace GZiper.Core {
     public static class Writer {
         private static bool _started;
-        public static bool Done;
+        public static bool IsCompressDone { private get; set; }
+        public static ushort OrderId { get; private set; }
 
-        private static List<Block> _blocks;
+        private static readonly List<Block> Blocks;
 
-        public static void StartWrite(string pathToFile, bool compress) {
-            if (IsStarted())
-                return;
-            int number = 1;
-            using (FileStream writeStream = new FileStream(pathToFile, FileMode.Append)) {
-                while (!IsCollectorsDone() || GetCount() > 0) {
-                    if (GetCount() == 0)
-                        continue;
-                    Block block = GetBlock(number);
-                    if (block.Number != number)
-                        continue;
-                    number++;
-                    if (compress)
-                        WriteBlockSize(writeStream, block.Bytes.Length);
-                    writeStream.Write(block.Bytes, 0, block.Bytes.Length);
-                    Console.WriteLine(block.Bytes.Length + " o");
-
-                }
-            }
-
-            Break();
+        static Writer() {
+            Blocks = new List<Block>();
+            OrderId = 0;
         }
 
-        private static bool IsCollectorsDone() {
-            bool done = true;
-            foreach (Collector collector in Ziper.Collectors)
-                done &= collector.Done;
-            return done;
+        public static void Write(FileStream writeStream, bool compress) {
+            if (_started)
+                return;
+            _started = true;
+            IsCompressDone = false;
+
+            
+            while (!IsCompressDone || GetCount() > 0) 
+                WriteBlock( compress, writeStream);
+            Break();
         }
 
         private static void WriteBlockSize(FileStream writeStream, int size) {
             writeStream.Write(BitConverter.GetBytes(size), 0, 3);
         }
 
-        private static bool IsStarted() {
-            if (_started)
-                return true;
-            _started = true;
-            Done = false;
-            return false;
+        private static void WriteBlock( bool compress, FileStream writeStream) {
+            var block = GetBlock(OrderId);
+            if (block == null)
+                return;
+            OrderId++;
+            if (compress)
+                WriteBlockSize(writeStream, block.Value.Bytes.Length);
+            writeStream.Write(block.Value.Bytes, 0, block.Value.Bytes.Length);
         }
 
+
         private static void Break() {
-            Done = true;
             _started = false;
         }
 
         public static void AddBlock(Block block) {
-            if (_blocks == null)
-                _blocks = new List<Block>();
-            lock (_blocks) {
-                _blocks.Add(block);
+            lock (Blocks) {
+                Blocks.Add(block);
             }
         }
 
-        public static Block GetBlock(int number) {
-            if (_blocks == null)
-                _blocks = new List<Block>();
-            lock (_blocks) {
-                Block b = new Block();
-                for (int i = 0; i < _blocks.Count; i++)
-                    if (_blocks[i].Number == number) {
-                        b = _blocks[i];
-                        _blocks.RemoveAt(i);
+        private static Block? GetBlock(uint number) {
+            lock (Blocks) {
+                for (var i = 0; i < Blocks.Count; i++)
+                    if (Blocks[i].Number == number) {
+                        var b = Blocks[i];
+                        Blocks.RemoveAt(i);
+                        return b;
                     }
 
-                return b;
+                return null;
             }
         }
 
-        public static int GetCount() {
-            if (_blocks == null)
-                _blocks = new List<Block>();
-            lock (_blocks) {
-                return _blocks.Count;
+        private static int GetCount() {
+            lock (Blocks) {
+                return Blocks.Count;
             }
         }
     }
