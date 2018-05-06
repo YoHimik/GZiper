@@ -1,56 +1,57 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
 using System.Threading;
 
 namespace GZiper.Core {
-    public class Archiver  {
+    public class Archiver {
         private bool _isInterupeted;
-        public bool IsDone { get; private set; }
+        public bool Done { get; private set; }
+        private const ushort SleepTime = 500;
 
-        
-      
         public Archiver() {
             _isInterupeted = false;
+            Done = false;
         }
 
-        public void Compress() {
-            while (!_isInterupeted && (ArchiveThreadManager.GetBlockCount() > 0 || !ArchiveThreadManager.IsReadDone)) {
-                ComressBlock();
-            }
+        public void Start(bool isCompress) {
+            try {
+                while (!_isInterupeted && ArchiveThreadManager.OrderId != Ziper.BlocksCount) {
+                    var currentBlock = ArchiveThreadManager.DequeueBlock();
+                    if (currentBlock == null) {
+                        Thread.Sleep(SleepTime);
+                        continue;
+                    }
 
-            IsDone = true;
-        }
-
-        private static void ComressBlock() {
-            var currentBlock = ArchiveThreadManager.DequeueBlock();
-            if (currentBlock == null) {
-                return;
-            }
-
-            using (var memoryStream = new MemoryStream()) {
-                using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress)) {
-                    gzipStream.Write(currentBlock.Value.Bytes, 0, currentBlock.Value.Bytes.Length);
+                    if (isCompress)
+                        ComressBlock(currentBlock.Value);
+                    else
+                        DecompressBlock(currentBlock.Value);
                 }
+            }
+            catch (Exception e) {
+                Console.WriteLine("Unknown error has been occured!");
+                Console.WriteLine(e.Message);
+                Ziper.Cancel();
+            }
 
-                Writer.AddBlock(new Block(currentBlock.Value.Number, memoryStream.ToArray()));
+            Done = true;
+        }
+
+        private static void ComressBlock(Block block) {
+            using (var memoryStream = new MemoryStream()) {
+                using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress))
+                    gzipStream.Write(block.Bytes, 0, block.Bytes.Length);
+                Writer.AddBlock(new Block(block.Number, memoryStream.ToArray()));
             }
         }
 
-        public void Decompress() {
-            while (!_isInterupeted && (ArchiveThreadManager.GetBlockCount() > 0 || !ArchiveThreadManager.IsReadDone))
-                DecomressBlock();
-            IsDone = true;
-        }
-
-        private static void DecomressBlock() {
-            var currentBlock = ArchiveThreadManager.DequeueBlock();
-            if (currentBlock == null)
-                return;
-            using (var memoryStream = new MemoryStream(currentBlock.Value.Bytes)) {
-                using (var zipStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
+        private static void DecompressBlock(Block block) {
+            using (var memoryStreamIn = new MemoryStream(block.Bytes)) {
+                using (var zipStream = new GZipStream(memoryStreamIn, CompressionMode.Decompress)) {
                     using (var memoryStreamOut = new MemoryStream()) {
                         zipStream.CopyTo(memoryStreamOut);
-                        Writer.AddBlock(new Block(currentBlock.Value.Number, memoryStreamOut.ToArray()));
+                        Writer.AddBlock(new Block(block.Number, memoryStreamOut.ToArray()));
                     }
                 }
             }

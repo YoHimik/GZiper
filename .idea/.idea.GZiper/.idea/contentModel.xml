@@ -14,9 +14,9 @@
         <e p="Ziper.cs" t="Include" />
       </e>
       <e p="ds.iso" t="Include" />
+      <e p="dsd.iso" t="Include" />
       <e p="GZiper.csproj" t="IncludeRecursive" />
       <e p="GZiper.sln" t="IncludeFlat" />
-      <e p="jk.iso" t="Include" />
       <e p="obj" t="ExcludeRecursive">
         <e p="Debug" t="Include">
           <e p="net45" t="Include">
@@ -24,10 +24,13 @@
           </e>
         </e>
       </e>
+      <e p="outfdddss3.gzz" t="Include" />
+      <e p="outfddsdddss3.gzz" t="Include" />
       <e p="packages" t="ExcludeRecursive" />
       <e p="Program.cs" t="Include" />
       <e p="test-img.jpg" t="Include" />
-      <e p="test.gz" t="Include" />
+      <e p="уdрок5.mp4" t="Include" />
+      <e p="урок5.mp4" t="Include" />
     </e>
   </component>
 </project>

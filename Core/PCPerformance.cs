@@ -1,20 +1,49 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace GZiper.Core {
     internal static class PcPerformance {
+        private const ushort CpuUpdateTime = 1000;
+        private const ushort RamUpdateTime = 500;
+        
         private static readonly PerformanceCounter RamCounter =
             new PerformanceCounter("Memory", "Available MBytes");
 
         private static readonly PerformanceCounter CpuCounter =
-            new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
+        
+        private static readonly Stopwatch CpuTimer = new Stopwatch();
+        private static readonly Stopwatch RamTimer = new Stopwatch();
 
-        public static float GetRamValue() {
-            return RamCounter.NextValue();
+        private static float _cpu;                
+
+        public static float Cpu {
+            get {
+                if (!CpuTimer.IsRunning) {
+                    _cpu = CpuCounter.NextValue();
+                    CpuTimer.Start();
+                }
+
+                if (CpuTimer.ElapsedMilliseconds <= CpuUpdateTime) return _cpu;
+                _cpu = CpuCounter.NextValue();
+                CpuTimer.Restart();
+                return _cpu;
+            }
         }
 
-        public static float GetCpuValue() {
-            return CpuCounter.NextValue();
+        private static float _ram;
+
+        public static float Ram {
+            get {
+                if (!RamTimer.IsRunning) {
+                    _ram = RamCounter.NextValue();
+                    RamTimer.Start();
+                }
+
+                if (RamTimer.ElapsedMilliseconds <= RamUpdateTime) return _ram;
+                _ram = RamCounter.NextValue();
+                RamTimer.Restart();
+                return _ram;
+            }
         }
     }
 }
