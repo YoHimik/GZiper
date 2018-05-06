@@ -3,12 +3,7 @@ using GZiper.Core;
 
 namespace GZiper {
     internal static class Program {
-        private static void Main(string[] args) {
-            args = new string[3];
-            args[0] = "decompress";
-            //args[1] = "decompress";
-            args[2] = "dsd.iso";
-            args[1] = "outfddsdddss3.gzz";
+        private static void Main(string[] args) {          
             try {
                 if (args.Length != 3)
                     throw new ArgumentException("Not enough or too many arguments!");
